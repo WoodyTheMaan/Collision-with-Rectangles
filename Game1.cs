@@ -22,6 +22,7 @@ namespace Collision_with_Rectangles
         Texture2D barrierTexture;
         Rectangle barrierRect1, barrierRect2;
         Texture2D coinTexture;
+        
         List<Rectangle> coins;
         Random rand;
         int pacSpeed;
@@ -37,7 +38,7 @@ namespace Collision_with_Rectangles
 
         protected override void Initialize()
         {
-            _graphics.PreferredBackBufferWidth = 700;
+            _graphics.PreferredBackBufferWidth = 800;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
             // TODO: Add your initialization logic here
@@ -89,6 +90,7 @@ namespace Collision_with_Rectangles
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
 
             if (keyboardState.IsKeyDown(Keys.Left))
             {
@@ -100,16 +102,35 @@ namespace Collision_with_Rectangles
                 pacRect.X += pacSpeed;
                 currentPacTexture = pacRightTexture;
             }
+            if (pacRect.Intersects(barrierRect1))
+            {
+                pacRect.X = barrierRect1.Right;
+            }
+
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 pacRect.Y -= pacSpeed;
                 currentPacTexture = pacUpTexture;
             }
+            if (pacRect.Intersects(barrierRect1))
+            {
+                pacRect.Y = barrierRect1.Bottom;
+            }
             if (keyboardState.IsKeyDown(Keys.Down))
             {
                 pacRect.Y += pacSpeed;
                 currentPacTexture = pacDownTexture;
+            }            
+            if (pacRect.Intersects(barrierRect1))
+            {
+                pacRect.Y = barrierRect1.Top - pacRect.Height;
             }
+            if (mouseState.LeftButton == ButtonState.Pressed & exitRect.Contains(mouseState.X, mouseState.Y))
+                Exit();
+            if (exitRect.Contains(pacRect))
+                Exit();
+
+
             bool didSpawn = false;
             for (int i = 0; i < coins.Count; i++)
             {
@@ -123,7 +144,22 @@ namespace Collision_with_Rectangles
                 }
             }
             
-
+            if (pacRect.Right > _graphics.PreferredBackBufferWidth)
+            {
+                pacRect.X = _graphics.PreferredBackBufferWidth - pacRect.Width;
+            }
+            else if (pacRect.Left < 0)
+            {
+                pacRect.X = 0;
+            }
+            if(pacRect.Bottom > _graphics.PreferredBackBufferHeight)
+            {
+                pacRect.Y = _graphics.PreferredBackBufferHeight - pacRect.Height;
+            }
+            else if( pacRect.Top < 0)
+            {
+                pacRect.Y = 0;
+            }
             // TODO: Add your update logic here
 
             base.Update(gameTime);
